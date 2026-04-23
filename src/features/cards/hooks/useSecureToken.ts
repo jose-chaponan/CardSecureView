@@ -4,8 +4,9 @@ export const useSecureToken = () => {
   const getSecureToken = useCallback(async (cardId: string): Promise<string> => {
     return new Promise(resolve => {
       setTimeout(() => {
-        resolve(`${cardId}_${Date.now()}_${Math.random().toString(36).substring(2)}`);
-      }, 1000);
+        const timestamp = Math.floor(Date.now() / 1000);
+        resolve(`TOKEN-${timestamp}`);
+      }, 500);
     });
   }, []);
 

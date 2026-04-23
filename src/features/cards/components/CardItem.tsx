@@ -5,6 +5,7 @@ import { CardItemProps } from '../types/card.types';
 const BRAND_COLORS: Record<string, string> = {
   Visa: '#1A1F71',
   Mastercard: '#EB001B',
+  AmericanExpress: '#257fd3',
 };
 
 const CardItem: FC<CardItemProps> = memo(({ card, onViewSensitive }) => {
@@ -107,9 +108,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   button: {
-    backgroundColor: '#1A1A2E',
+    backgroundColor: '#1a1a2e',
+    paddingVertical: 10,
     borderRadius: 10,
-    paddingVertical: 12,
     alignItems: 'center',
   },
   buttonText: {

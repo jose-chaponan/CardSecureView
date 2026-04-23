@@ -23,5 +23,9 @@
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
       </activity>
+      <activity
+        android:name=".CardSecureActivity"
+        android:theme="@style/Theme.AppCompat.NoActionBar"
+        android:exported="false" />
     </application>
 </manifest>

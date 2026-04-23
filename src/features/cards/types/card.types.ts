@@ -2,6 +2,8 @@ export interface Card {
   cardId: string;
   alias: string;
   maskedPan: string;
+  pan: string;
+  cvv: string;
   brand: string;
   holder: string;
   expiry: string;

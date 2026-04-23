@@ -1,11 +1,12 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   View,
   Text,
   FlatList,
-  Alert,
   StyleSheet,
   StatusBar,
+  NativeModules,
+  NativeEventEmitter,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../types/card.types';
@@ -13,14 +14,65 @@ import { useCards } from '../hooks/useCards';
 import { useSecureToken } from '../hooks/useSecureToken';
 import CardItem from '../components/CardItem';
 
+const { CardSecureModule } = NativeModules;
+
 const DashboardScreen: React.FC = () => {
   const { cards } = useCards();
   const { getSecureToken } = useSecureToken();
 
-  const handleViewSensitive = useCallback(async (cardId: string) => {
-    const token = await getSecureToken(cardId);
-    Alert.alert('Token generado', `Token: ${token}`, [{ text: 'Cerrar', style: 'cancel' }]);
-  }, [getSecureToken]);
+  useEffect(() => {
+    const eventEmitter = new NativeEventEmitter(CardSecureModule);
+
+    const openSub = eventEmitter.addListener('onSecureViewOpened', cardId => {
+      console.log(`Vista segura abierta para: ${cardId}`);
+    });
+
+    const dataSub = eventEmitter.addListener('onCardDataShown', cardId => {
+      console.log(`Datos mostrados para: ${cardId}`);
+    });
+
+    const errorSub = eventEmitter.addListener(
+      'onValidationError',
+      ({ code, message }) => {
+        console.error(`Error de validación [${code}]: ${message}`);
+      },
+    );
+
+    const closeSub = eventEmitter.addListener(
+      'onSecureViewClosed',
+      ({ cardId, reason }) => {
+        console.log(`Vista segura cerrada para ${cardId}. Razón: ${reason}`);
+      },
+    );
+
+    return () => {
+      openSub.remove();
+      dataSub.remove();
+      errorSub.remove();
+      closeSub.remove();
+    };
+  }, []);
+
+  const handleViewSensitive = useCallback(
+    async (cardId: string) => {
+      try {
+        const card = cards.find(c => c.cardId === cardId);
+        if (!card) return;
+        const token = await getSecureToken(cardId);
+        await CardSecureModule.openSecureView(
+          cardId,
+          card.pan,
+          card.cvv,
+          card.expiry,
+          card.holder,
+          token,
+        );
+      } catch (error) {
+        console.error('Error al abrir la vista segura:', error);
+      }
+    },
+    [cards, getSecureToken],
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: Card }) => (
@@ -74,8 +126,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   listContent: {
-    paddingTop: 12,
-    paddingBottom: 32,
+    display: 'flex',
+    gap: 10,
+    paddingVertical: 8,
   },
   emptyText: {
     textAlign: 'center',
