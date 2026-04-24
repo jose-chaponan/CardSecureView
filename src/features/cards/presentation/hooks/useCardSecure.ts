@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from 'react';
-import { cardSecureService } from '../services/cardSecure.service';
+import { cardSecureService } from '../../data/services/card-secure.service';
+import { openSecureViewUseCase } from '../../domain/use-cases/open-secure-view.use-case';
 import { useCardsStore } from '../store/cards.store';
-import { useSecureToken } from './useSecureToken';
+import { isTokenExpired, useSecureToken } from './useSecureToken';
 
 export const useCardSecure = () => {
   const cards = useCardsStore(state => state.cards);
@@ -32,14 +33,10 @@ export const useCardSecure = () => {
       if (!card) return;
       try {
         const token = await getSecureToken(cardId);
-        await cardSecureService.openSecureView(
-          cardId,
-          card.pan,
-          card.cvv,
-          card.expiry,
-          card.holder,
-          token,
-        );
+        if (isTokenExpired(token)) {
+          throw new Error('El token de seguridad ha expirado. Intenta nuevamente.');
+        }
+        await openSecureViewUseCase(card, token);
       } catch (error) {
         console.error('Error al abrir la vista segura:', error);
       }
