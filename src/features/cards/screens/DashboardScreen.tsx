@@ -1,103 +1,68 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { FC, useCallback } from 'react';
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
   StatusBar,
-  NativeModules,
-  NativeEventEmitter,
+  TouchableOpacity,
 } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../types/card.types';
-import { useCards } from '../hooks/useCards';
-import { useSecureToken } from '../hooks/useSecureToken';
 import CardItem from '../components/CardItem';
+import CardItemSkeleton from '../components/CardItemSkeleton';
+import { generateUUID } from '../../../shared/utils/uuid';
+import { useDashboardScreen } from '../hooks/useDashboardScreen';
 
-const { CardSecureModule } = NativeModules;
+const SKELETON_COUNT = 3;
 
-const DashboardScreen: React.FC = () => {
-  const { cards } = useCards();
-  const { getSecureToken } = useSecureToken();
-
-  useEffect(() => {
-    const eventEmitter = new NativeEventEmitter(CardSecureModule);
-
-    const openSub = eventEmitter.addListener('onSecureViewOpened', cardId => {
-      console.log(`Vista segura abierta para: ${cardId}`);
-    });
-
-    const dataSub = eventEmitter.addListener('onCardDataShown', cardId => {
-      console.log(`Datos mostrados para: ${cardId}`);
-    });
-
-    const errorSub = eventEmitter.addListener(
-      'onValidationError',
-      ({ code, message }) => {
-        console.error(`Error de validación [${code}]: ${message}`);
-      },
-    );
-
-    const closeSub = eventEmitter.addListener(
-      'onSecureViewClosed',
-      ({ cardId, reason }) => {
-        console.log(`Vista segura cerrada para ${cardId}. Razón: ${reason}`);
-      },
-    );
-
-    return () => {
-      openSub.remove();
-      dataSub.remove();
-      errorSub.remove();
-      closeSub.remove();
-    };
-  }, []);
-
-  const handleViewSensitive = useCallback(
-    async (cardId: string) => {
-      try {
-        const card = cards.find(c => c.cardId === cardId);
-        if (!card) return;
-        const token = await getSecureToken(cardId);
-        await CardSecureModule.openSecureView(
-          cardId,
-          card.pan,
-          card.cvv,
-          card.expiry,
-          card.holder,
-          token,
-        );
-      } catch (error) {
-        console.error('Error al abrir la vista segura:', error);
-      }
-    },
-    [cards, getSecureToken],
-  );
+const DashboardScreen: FC = () => {
+  const { cards, isLoading, openSecureView, logout } = useDashboardScreen();
 
   const renderItem = useCallback(
     ({ item }: { item: Card }) => (
-      <CardItem card={item} onViewSensitive={handleViewSensitive} />
+      <CardItem card={item} onViewSensitive={openSecureView} />
     ),
-    [handleViewSensitive],
+    [openSecureView],
   );
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#1A1A2E" />
       <View style={styles.header}>
-        <Text style={styles.headerGreeting}>Bienvenido</Text>
-        <Text style={styles.headerTitle}>Mis tarjetas</Text>
+        <View>
+          <Text style={styles.headerGreeting}>Bienvenido</Text>
+          <Text style={styles.headerTitle}>Mis tarjetas</Text>
+        </View>
+        <TouchableOpacity
+          onPress={logout}
+          style={styles.logoutBtn}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.logoutText}>Salir</Text>
+        </TouchableOpacity>
       </View>
-      <FlatList
-        data={cards}
-        keyExtractor={item => item.cardId}
-        renderItem={renderItem}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No tienes tarjetas registradas.</Text>
-        }
-      />
+
+      {isLoading ? (
+        <View style={styles.skeletonList}>
+          {Array.from({ length: SKELETON_COUNT }).map(() => (
+            <CardItemSkeleton key={generateUUID()} />
+          ))}
+        </View>
+      ) : (
+        <FlashList
+          data={cards}
+          keyExtractor={item => item.cardId}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>
+              No tienes tarjetas registradas.
+            </Text>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 };
@@ -112,6 +77,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
   },
   headerGreeting: {
     fontSize: 13,
@@ -125,9 +93,23 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
+  logoutBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#3A3A5C',
+  },
+  logoutText: {
+    color: '#A0A0C0',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  skeletonList: {
+    flex: 1,
+    paddingTop: 8,
+  },
   listContent: {
-    display: 'flex',
-    gap: 10,
     paddingVertical: 8,
   },
   emptyText: {
