@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { Card } from '../types/card.types';
-import { mockCards } from '../data/cards.mock';
+import { useCardsStore } from '../store/cards.store';
 
-export const useCards = (): { cards: Card[] } => {
-  const cards = useMemo(() => mockCards, []);
-  return { cards };
+export const useCards = () => {
+  const cards = useCardsStore(state => state.cards);
+  const isLoading = useCardsStore(state => state.isLoading);
+  const loadCards = useCardsStore(state => state.loadCards);
+  return { cards, isLoading, loadCards };
 };
