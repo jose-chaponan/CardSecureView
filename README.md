@@ -1,97 +1,220 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# 🔐 CardSecureView
 
-# Getting Started
+> Aplicación móvil React Native para visualización segura de tarjetas bancarias.
+> Módulo nativo Android con `FLAG_SECURE`, validación de token por TTL y auto-cierre por inactividad.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+[![React Native](https://img.shields.io/badge/React_Native-0.85-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Android](https://img.shields.io/badge/Android-API_24+-34A853?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
+[![Firebase](https://img.shields.io/badge/Firebase-24.0-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com)
+[![Node](https://img.shields.io/badge/Node.js-22.11+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org)
 
-## Step 1: Start Metro
+---
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 📋 Tabla de contenidos
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- [⚙️ Requisitos y setup](#️-requisitos-y-setup)
+- [🏗️ Arquitectura](#️-arquitectura)
+- [📡 API nativa](#-api-nativa)
+- [🔒 Seguridad](#-seguridad)
 
-```sh
-# Using npm
-npm start
+---
 
-# OR using Yarn
-yarn start
+## ⚙️ Requisitos y setup
+
+### Herramientas necesarias
+
+| Herramienta | Versión mínima |
+| --- | --- |
+| Node.js | 22.11.0 |
+| JDK | 17 |
+| Android Studio | Ladybug 2024.2.1+ |
+| Android SDK | API 36 (compileSdk) / API 24 mínimo |
+| React Native CLI | 20.1.0 |
+
+### Variables de entorno
+
+Crear un archivo `.env` en la raíz del proyecto:
+
+```env
+TEST_EMAIL=tu@email.com
+TEST_PASSWORD=tuPassword
 ```
 
-## Step 2: Build and run your app
+> ⚠️ Este archivo **nunca** debe subirse al repositorio. Ya está incluido en `.gitignore`.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### Instalación y ejecución
 
-### Android
+```bash
+# Instalar dependencias
+npm install
 
-```sh
-# Using npm
+# Android — requiere emulador o dispositivo conectado
 npm run android
 
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+# iOS — solo macOS, requiere CocoaPods
+bundle install && bundle exec pod install
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+```bash
+npm run lint   # ESLint
+npm test       # Jest
+```
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+---
 
-## Step 3: Modify your app
+## 🏗️ Arquitectura
 
-Now that you have successfully run the app, let's make changes!
+El proyecto aplica **Clean Architecture** organizado por **Vertical Slicing** — cada feature es autónoma y contiene su propia capa de dominio, datos y presentación.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Estructura de carpetas
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```text
+CardSecureView/
+├── App.tsx                               ← composición de providers + navigator
+├── src/
+│   ├── app/
+│   │   ├── navigation/
+│   │   │   ├── root-navigator.tsx        ← Stack.Navigator según auth state
+│   │   │   └── types.ts
+│   │   └── providers/
+│   │       └── auth-session-provider.tsx ← Firebase listener + loading screen
+│   │
+│   ├── features/
+│   │   ├── auth/                         ── feature autónoma
+│   │   │   ├── constants/
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/             ← AuthUser
+│   │   │   │   └── use-cases/            ← loginUseCase · logoutUseCase
+│   │   │   ├── data/services/            ← authService (Firebase)
+│   │   │   └── presentation/
+│   │   │       ├── hooks/                ← useLoginScreen
+│   │   │       ├── screens/              ← LoginScreen
+│   │   │       └── store/                ← Zustand auth store
+│   │   │
+│   │   └── cards/                        ── feature autónoma
+│   │       ├── domain/
+│   │       │   ├── entities/             ← Card
+│   │       │   └── use-cases/            ← openSecureViewUseCase
+│   │       ├── data/
+│   │       │   ├── mocks/
+│   │       │   └── services/             ← cardSecureService (NativeModules bridge)
+│   │       └── presentation/
+│   │           ├── components/           ← CardItem · CardItemSkeleton
+│   │           ├── hooks/                ← useCardSecure · useCards · useSecureToken · useDashboardScreen
+│   │           ├── screens/              ← DashboardScreen
+│   │           └── store/                ← Zustand cards store
+│   │
+│   └── shared/
+│       ├── infrastructure/native/        ← placeholder bridges nativos transversales
+│       └── utils/uuid.ts
+│
+└── android/app/src/main/java/com/cardsecureview/
+    ├── CardSecureModule.kt               ← ReactContextBaseJavaModule
+    ├── CardSecureActivity.kt             ← FLAG_SECURE · validación token · auto-hide
+    └── CardSecurePackage.kt
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+### Flujo de capas
 
-## Congratulations! :tada:
+```text
+domain/entities      ← sin dependencias externas
+       ↑
+domain/use-cases     ← entities + data/services
+       ↑
+data/services        ← Firebase / NativeModules  (nunca importa presentation)
+       ↑
+presentation/store   ← use-cases  (Zustand)
+       ↑
+presentation/hooks   ← store + use-cases
+       ↑
+presentation/screens ← solo hooks
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+| Capa | Responsabilidad |
+| --- | --- |
+| `domain/entities` | Modelos de negocio puros, sin frameworks |
+| `domain/use-cases` | Orquestación de lógica de negocio |
+| `data/services` | Acceso a datos externos (Firebase, NativeModules) |
+| `presentation/store` | Estado reactivo con Zustand |
+| `presentation/hooks` | Lógica de UI y composición de estado |
+| `presentation/screens` | UI declarativa pura |
 
-### Now what?
+### Decisiones técnicas
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+| Decisión | Alternativa descartada | Razón |
+| --- | --- | --- |
+| **Zustand** | Redux | Sin boilerplate de actions/reducers; selectores con memoización nativa |
+| **FlashList** | FlatList | Recycling nativo más eficiente; mejor rendimiento en scroll |
+| **NativeEventEmitter** | Callbacks directos | Desacopla el ciclo de vida de `CardSecureActivity` del componente React |
+| **TTL en dos capas** | Solo validación nativa | JS valida a 30s anticipadamente; nativo valida a 60s como segunda línea |
+| **`useRef` para `lastCardId`** | Estado React | Evita dependencias circulares en `useCallback` al implementar retry |
 
-# Troubleshooting
+---
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## 📡 API nativa
 
-# Learn More
+### `CardSecureModule.openSecureView`
 
-To learn more about React Native, take a look at the following resources:
+Abre la vista segura nativa. El módulo valida el token antes de mostrar cualquier dato sensible.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+```ts
+openSecureView(
+  cardId: string,   // identificador único de la tarjeta
+  pan:    string,   // número de tarjeta completo
+  cvv:    string,   // código de seguridad
+  expiry: string,   // formato MM/YY
+  holder: string,   // nombre del titular
+  token:  string,   // formato: TOKEN-{unix_timestamp_en_segundos}
+): Promise<void>
+```
+
+### Eventos del nativo → JS
+
+| Evento | Parámetros | Cuándo se emite |
+| --- | --- | --- |
+| `onSecureViewOpened` | `cardId: string` | La `CardSecureActivity` se abrió exitosamente |
+| `onCardDataShown` | `cardId: string` | El usuario tocó el botón para revelar datos |
+| `onValidationError` | `{ code: string, message: string }` | El token no pasó la validación de formato o TTL |
+| `onSecureViewClosed` | `{ cardId: string, reason: string }` | Vista cerrada (back, timeout o post-error) |
+
+### Códigos de `onValidationError`
+
+| Código | Causa | Respuesta en JS |
+| --- | --- | --- |
+| `TOKEN_EXPIRED` | Timestamp supera el TTL (30s en JS / 60s en nativo) | Alert con opciones "Cerrar" y "Reintentar" |
+| `TOKEN_INVALID` | Formato incorrecto, prefijo ausente o token corrupto | Alert con "Entendido" únicamente |
+
+---
+
+## 🔒 Seguridad
+
+### Módulo nativo — `CardSecureActivity`
+
+| Medida | Estado | Detalle |
+| --- | --- | --- |
+| `FLAG_SECURE` | ✅ | Activo en `onCreate`. Bloquea capturas de pantalla, grabación y aparición en recientes |
+| Auto-ocultar en `onPause` | ✅ | Layout oculto al ir a background; se restaura en `onResume` |
+| Timeout de 30 segundos | ✅ | Countdown visible; cierra la activity automáticamente al llegar a cero |
+| Validación de formato | ✅ | Verifica prefijo `TOKEN-` y timestamp parseable |
+| Validación de TTL | ✅ | Timestamp debe ser menor a 60s; emite `TOKEN_EXPIRED` si se supera |
+
+### Capa JavaScript
+
+| Medida | Estado | Detalle |
+| --- | --- | --- |
+| Validación TTL anticipada | ✅ | `isTokenExpired()` verifica 30s **antes** de llamar al nativo |
+| Sin logs de datos sensibles | ✅ | Ningún `console.log` imprime PAN, CVV, token ni titular |
+| Sin `Log.d` en Android | ✅ | El código nativo no expone datos de tarjeta en logs del sistema |
+| Limpieza de listeners | ✅ | `useEffect` elimina todas las suscripciones a `NativeEventEmitter` en cleanup |
+
+### Archivos sensibles y `.gitignore`
+
+| Archivo | Ignorado |
+| --- | --- |
+| `.env` | ✅ |
+| `google-services.json` | ✅ |
+| `GoogleService-Info.plist` | ✅ |
+| `*.keystore` | ✅ |
+| `local.properties` | ✅ |
