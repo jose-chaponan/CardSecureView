@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card } from '../types/card.types';
+import { Card } from '../../domain/entities/card.entity';
 import CardItem from '../components/CardItem';
 import CardItemSkeleton from '../components/CardItemSkeleton';
-import { generateUUID } from '../../../shared/utils/uuid';
+import { generateUUID } from '../../../../shared/utils/uuid';
 import { useDashboardScreen } from '../hooks/useDashboardScreen';
 
 const SKELETON_COUNT = 3;

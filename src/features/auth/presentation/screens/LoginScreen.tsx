@@ -56,7 +56,7 @@ const LoginScreen: FC = () => {
             placeholder="••••••••"
           />
 
-          {error && <Text style={styles.error}>{error}</Text>}
+          {!!error && <Text style={styles.error}>{error}</Text>}
 
           <TouchableOpacity
             style={[styles.button, isLoading && styles.buttonDisabled]}

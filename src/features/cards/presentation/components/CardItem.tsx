@@ -1,6 +1,11 @@
 import React, { FC, memo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { CardItemProps } from '../types/card.types';
+import { Card } from '../../domain/entities/card.entity';
+
+export interface CardItemProps {
+  card: Card;
+  onViewSensitive: (cardId: string) => void;
+}
 
 const BRAND_COLORS: Record<string, string> = {
   Visa: '#1A1F71',

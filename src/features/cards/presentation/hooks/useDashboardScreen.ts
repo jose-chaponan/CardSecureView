@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAuthStore } from '../../auth/store/auth.store';
+import { useAuthStore } from '../../../auth/presentation/store/auth.store';
 import { useCards } from './useCards';
 import { useCardSecure } from './useCardSecure';
 

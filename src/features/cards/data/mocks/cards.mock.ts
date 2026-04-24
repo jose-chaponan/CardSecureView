@@ -1,4 +1,4 @@
-import { Card } from '../types/card.types';
+import { Card } from '../../domain/entities/card.entity';
 
 export const mockCards: Card[] = [
   {

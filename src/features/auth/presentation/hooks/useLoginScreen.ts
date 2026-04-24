@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AUTH_TEST_EMAIL, AUTH_TEST_PASSWORD } from '../constants';
+import { AUTH_TEST_EMAIL, AUTH_TEST_PASSWORD } from '../../constants';
 import { useAuthStore } from '../store/auth.store';
 
 export const useLoginScreen = () => {

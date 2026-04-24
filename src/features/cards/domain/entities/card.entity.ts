@@ -9,8 +9,3 @@ export interface Card {
   expiry: string;
   accountId: string;
 }
-
-export interface CardItemProps {
-  card: Card;
-  onViewSensitive: (cardId: string) => void;
-}

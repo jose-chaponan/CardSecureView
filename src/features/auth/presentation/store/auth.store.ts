@@ -1,5 +1,7 @@
 import { create } from 'zustand';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { loginUseCase } from '../../domain/use-cases/login.use-case';
+import { logoutUseCase } from '../../domain/use-cases/logout.use-case';
 
 interface AuthState {
   user: FirebaseAuthTypes.User | null;
@@ -22,13 +24,13 @@ export const useAuthStore = create<AuthState>(set => ({
   login: async (email, password) => {
     set({ isLoading: true });
     try {
-      await auth().signInWithEmailAndPassword(email, password);
+      await loginUseCase(email, password);
     } finally {
       set({ isLoading: false });
     }
   },
 
   logout: async () => {
-    await auth().signOut();
+    await logoutUseCase();
   },
 }));

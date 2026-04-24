@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Card } from '../types/card.types';
-import { mockCards } from '../data/cards.mock';
+import { Card } from '../../domain/entities/card.entity';
+import { mockCards } from '../../data/mocks/cards.mock';
 
 interface CardsState {
   cards: Card[];
