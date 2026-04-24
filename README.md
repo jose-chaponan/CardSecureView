@@ -32,6 +32,16 @@
 | Android SDK | API 36 (compileSdk) / API 24 mínimo |
 | React Native CLI | 20.1.0 |
 
+### Configuración de Firebase
+
+Descarga el archivo de configuración desde **Firebase Console → Configuración del proyecto → Tu app Android** y colócalo en:
+
+```text
+android/app/google-services.json
+```
+
+> ⚠️ Este archivo contiene API keys y **nunca** debe subirse al repositorio. Ya está incluido en `.gitignore`.
+
 ### Variables de entorno
 
 Crear un archivo `.env` en la raíz del proyecto:
