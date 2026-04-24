@@ -37,6 +37,8 @@ const DashboardScreen: FC = () => {
           onPress={logout}
           style={styles.logoutBtn}
           activeOpacity={0.7}
+          accessibilityLabel="Cerrar sesión"
+          accessibilityRole="button"
         >
           <Text style={styles.logoutText}>Salir</Text>
         </TouchableOpacity>

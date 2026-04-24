@@ -24,16 +24,25 @@ const CardItem: FC<CardItemProps> = memo(({ card, onViewSensitive }) => {
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.pan}>{card.maskedPan}</Text>
+        <Text
+          style={styles.pan}
+          accessibilityLabel={`Número de tarjeta ${card.maskedPan}`}
+        >
+          {card.maskedPan}
+        </Text>
 
         <View style={styles.metaRow}>
           <View>
             <Text style={styles.metaLabel}>TITULAR</Text>
-            <Text style={styles.metaValue}>{card.holder}</Text>
+            <Text style={styles.metaValue} accessibilityLabel={`Titular ${card.holder}`}>
+              {card.holder}
+            </Text>
           </View>
           <View style={styles.metaRight}>
             <Text style={styles.metaLabel}>VENCE</Text>
-            <Text style={styles.metaValue}>{card.expiry}</Text>
+            <Text style={styles.metaValue} accessibilityLabel={`Fecha de vencimiento ${card.expiry}`}>
+              {card.expiry}
+            </Text>
           </View>
         </View>
 
@@ -41,6 +50,8 @@ const CardItem: FC<CardItemProps> = memo(({ card, onViewSensitive }) => {
           style={styles.button}
           onPress={() => onViewSensitive(card.cardId)}
           activeOpacity={0.8}
+          accessibilityLabel={`Ver datos sensibles de tarjeta ${card.alias}`}
+          accessibilityRole="button"
         >
           <Text style={styles.buttonText}>Ver datos sensibles</Text>
         </TouchableOpacity>

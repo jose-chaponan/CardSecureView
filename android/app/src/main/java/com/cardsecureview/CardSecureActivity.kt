@@ -39,10 +39,15 @@ class CardSecureActivity : AppCompatActivity() {
 
         CardSecureModule.emitEvent("onSecureViewOpened", cardId)
 
-        if (!isValidToken(token)) {
+        val tokenError = validateToken(token)
+        if (tokenError != null) {
+            val message = if (tokenError == "TOKEN_EXPIRED")
+                "El token de seguridad ha expirado. Intenta nuevamente."
+            else
+                "El token proporcionado no es válido."
             val params = Arguments.createMap().apply {
-                putString("code", "INVALID_TOKEN")
-                putString("message", "El token proporcionado no es válido o ha expirado")
+                putString("code", tokenError)
+                putString("message", message)
             }
             CardSecureModule.emitEvent("onValidationError", params)
             finish()
@@ -100,14 +105,14 @@ class CardSecureActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.cvv).text = card.cvv
     }
 
-    private fun isValidToken(token: String): Boolean {
-        if (!token.startsWith("TOKEN-")) return false
+    private fun validateToken(token: String): String? {
+        if (!token.startsWith("TOKEN-")) return "TOKEN_INVALID"
         return try {
             val timestamp = token.substring(6).toLong()
-            val currentTimestamp = System.currentTimeMillis() / 1000
-            (currentTimestamp - timestamp) < 60
+            val elapsed = System.currentTimeMillis() / 1000 - timestamp
+            if (elapsed >= 60) "TOKEN_EXPIRED" else null
         } catch (e: Exception) {
-            false
+            "TOKEN_INVALID"
         }
     }
 
