@@ -11,11 +11,11 @@ export const isTokenExpired = (token: string): boolean => {
 
 export const useSecureToken = () => {
   const getSecureToken = useCallback(
-    async (cardId: string): Promise<string> => {
+    async (_cardId: string): Promise<string> => {
+      const timestamp = Math.floor(Date.now() / 1000);
       return new Promise(resolve => {
         setTimeout(() => {
-          const timestamp = Math.floor(Date.now() / 1000);
-          resolve(`TOKEN-${cardId}-${timestamp}`);
+          resolve(`TOKEN-${timestamp}`);
         }, 500);
       });
     },

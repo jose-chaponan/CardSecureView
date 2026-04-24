@@ -6,7 +6,7 @@ import {
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../domain/entities/card.entity';
 import CardItem from '../components/CardItem';
@@ -18,9 +18,8 @@ const SKELETON_COUNT = 3;
 
 const DashboardScreen: FC = () => {
   const { cards, isLoading, openSecureView, logout } = useDashboardScreen();
-
   const renderItem = useCallback(
-    ({ item }: { item: Card }) => (
+    ({ item }: ListRenderItemInfo<Card>) => (
       <CardItem card={item} onViewSensitive={openSecureView} />
     ),
     [openSecureView],
