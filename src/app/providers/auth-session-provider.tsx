@@ -1,6 +1,5 @@
 import React, { FC, ReactNode, useEffect } from 'react';
-import { ActivityIndicator, View, StyleSheet } from 'react-native';
-import { Text } from 'react-native';
+import { ActivityIndicator, View, StyleSheet, Text } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import { useAuthStore } from '../../features/auth/presentation/store/auth.store';
 

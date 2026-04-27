@@ -32,5 +32,7 @@ export const useAuthStore = create<AuthState>(set => ({
 
   logout: async () => {
     await logoutUseCase();
+    // Clear user state after logout
+    set({ user: null, initialized: false });
   },
 }));

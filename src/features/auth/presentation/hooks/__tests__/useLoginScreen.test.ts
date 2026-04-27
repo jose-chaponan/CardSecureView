@@ -64,4 +64,28 @@ describe('useLoginScreen', () => {
       'Credenciales inválidas. Verifica tu email y contraseña.',
     );
   });
+
+  it('handleLogin sets error and skips login when email is empty', async () => {
+    const { result } = renderHook(() => useLoginScreen());
+    act(() => result.current.setEmail(''));
+    await act(async () => { await result.current.handleLogin(); });
+    expect(result.current.error).toBe('El email es requerido.');
+    expect(mockLogin).not.toHaveBeenCalled();
+  });
+
+  it('handleLogin sets error and skips login when email has no @', async () => {
+    const { result } = renderHook(() => useLoginScreen());
+    act(() => result.current.setEmail('invalidemail'));
+    await act(async () => { await result.current.handleLogin(); });
+    expect(result.current.error).toBe('Por favor ingresa un email válido.');
+    expect(mockLogin).not.toHaveBeenCalled();
+  });
+
+  it('handleLogin sets error and skips login when password is empty', async () => {
+    const { result } = renderHook(() => useLoginScreen());
+    act(() => result.current.setPassword(''));
+    await act(async () => { await result.current.handleLogin(); });
+    expect(result.current.error).toBe('La contraseña es requerida.');
+    expect(mockLogin).not.toHaveBeenCalled();
+  });
 });

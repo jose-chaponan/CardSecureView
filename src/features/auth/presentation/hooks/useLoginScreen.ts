@@ -11,6 +11,18 @@ export const useLoginScreen = () => {
 
   const handleLogin = async () => {
     setError(null);
+    if (!email.trim()) {
+      setError('El email es requerido.');
+      return;
+    }
+    if (!email.includes('@')) {
+      setError('Por favor ingresa un email válido.');
+      return;
+    }
+    if (!password) {
+      setError('La contraseña es requerida.');
+      return;
+    }
     try {
       await login(email.trim(), password);
     } catch {

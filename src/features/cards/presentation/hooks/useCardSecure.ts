@@ -12,7 +12,8 @@ export interface ValidationError {
 export const useCardSecure = () => {
   const cards = useCardsStore(state => state.cards);
   const { getSecureToken } = useSecureToken();
-  const [validationError, setValidationError] = useState<ValidationError | null>(null);
+  const [validationError, setValidationError] =
+    useState<ValidationError | null>(null);
   const lastCardIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -24,11 +25,15 @@ export const useCardSecure = () => {
       emitter.addListener('onCardDataShown', (cardId: string) =>
         console.log(`Datos mostrados para: ${cardId}`),
       ),
-      emitter.addListener('onValidationError', ({ code, message }: ValidationError) =>
-        setValidationError({ code, message }),
+      emitter.addListener(
+        'onValidationError',
+        ({ code, message }: ValidationError) =>
+          setValidationError({ code, message }),
       ),
-      emitter.addListener('onSecureViewClosed', ({ cardId, reason }: { cardId: string; reason: string }) =>
-        console.log(`Vista segura cerrada para ${cardId}. Razón: ${reason}`),
+      emitter.addListener(
+        'onSecureViewClosed',
+        ({ cardId, reason }: { cardId: string; reason: string }) =>
+          console.log(`Vista segura cerrada para ${cardId}. Razón: ${reason}`),
       ),
     ];
     return () => subs.forEach(sub => sub.remove());
@@ -65,5 +70,10 @@ export const useCardSecure = () => {
     }
   }, [openSecureView]);
 
-  return { openSecureView, retrySecureView, validationError, clearValidationError };
+  return {
+    openSecureView,
+    retrySecureView,
+    validationError,
+    clearValidationError,
+  };
 };
